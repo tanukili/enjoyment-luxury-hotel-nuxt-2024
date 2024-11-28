@@ -1,7 +1,4 @@
-<script setup>
-const route = useRoute();
-const { userId } = route.params;
-</script>
+<script setup></script>
 
 <template>
   <main class="pt-18 pt-md-30 bg-neutral-120">
@@ -33,7 +30,7 @@ const { userId } = route.params;
         <ul class="nav mb-10 mb-md-20 fw-bold">
           <li class="nav-item position-relative">
             <NuxtLink
-              :to="`/user-${userId}`"
+              to="/user"
               exact-active-class="text-primary-100"
               class="nav-link px-6 py-4 text-white"
             >
@@ -42,7 +39,7 @@ const { userId } = route.params;
           </li>
           <li class="nav-item position-relative">
             <NuxtLink
-              :to="`/user-${userId}/order`"
+              to="/user/order"
               exact-active-class="text-primary-100"
               class="nav-link px-6 py-4 text-white"
             >

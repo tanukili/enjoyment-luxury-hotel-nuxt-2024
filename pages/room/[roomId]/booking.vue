@@ -12,7 +12,7 @@ const confirmBooking = () => {
   setTimeout(() => {
     isLoading.value = false;
     router.push({
-      path: "/booking/HH2302183151222",
+      path: "/booking-confirmation/HH2302183151222",
     });
   }, 1500);
 };

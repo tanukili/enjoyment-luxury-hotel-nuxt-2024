@@ -1,4 +1,7 @@
 <script setup>
+const route = useRoute();
+const { roomId } = route.params;
+
 const datePickerModal = ref(null);
 
 const openModal = () => {
@@ -502,7 +505,7 @@ const handleDateChange = (bookingInfo) => {
 
               <h5 class="mb-0 text-primary-100 fw-bold">NT$ 10,000</h5>
               <NuxtLink
-                to="/booking"
+                :to="`/room/${roomId}/booking`"
                 class="btn btn-primary-100 py-4 text-neutral-0 fw-bold rounded-3"
               >
                 立即預訂
@@ -537,7 +540,7 @@ const handleDateChange = (bookingInfo) => {
             >
           </div>
           <NuxtLink
-            to="/booking"
+            :to="`/room/${roomId}/booking`"
             class="btn btn-primary-100 px-12 py-4 text-neutral-0 fw-bold rounded-3"
           >
             立即預訂

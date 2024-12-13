@@ -12,8 +12,16 @@ const handleScroll = () => {
   isScrolled.value = window.scrollY > 50;
 };
 
+const { $bootstrap } = useNuxtApp();
+const headerCollapse = ref(null);
+
+watch(route, () => {
+  headerCollapse.value.toggle();
+});
+
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
+  headerCollapse.value = $bootstrap.Collapse(document.getElementById("navbar"));
 });
 
 onUnmounted(() => {

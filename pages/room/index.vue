@@ -141,7 +141,10 @@ const modules = ref([Autoplay, Navigation, Pagination]);
                   >
                     <p class="mb-0 fw-bold">NT$ 10,000</p>
                     <NuxtLink to="/room/a">
-                      <Icon class="bi fs-5" icon="mdi:arrow-right" />
+                      <Icon
+                        class="bi fs-5 text-primary-100"
+                        icon="mdi:arrow-right"
+                      />
                     </NuxtLink>
                   </div>
                 </div>
@@ -232,7 +235,10 @@ const modules = ref([Autoplay, Navigation, Pagination]);
                       to="/room/b"
                       class="icon-link icon-link-hover text-primary-100"
                     >
-                      <Icon class="bi fs-5" icon="mdi:arrow-right" />
+                      <Icon
+                        class="bi fs-5 text-primary-100"
+                        icon="mdi:arrow-right"
+                      />
                     </NuxtLink>
                   </div>
                 </div>
@@ -323,7 +329,10 @@ const modules = ref([Autoplay, Navigation, Pagination]);
                       to="/room/c"
                       class="icon-link icon-link-hover text-primary-100"
                     >
-                      <Icon class="bi fs-5" icon="mdi:arrow-right" />
+                      <Icon
+                        class="bi fs-5 text-primary-100"
+                        icon="mdi:arrow-right"
+                      />
                     </NuxtLink>
                   </div>
                 </div>
@@ -414,7 +423,10 @@ const modules = ref([Autoplay, Navigation, Pagination]);
                       to="/room/d"
                       class="icon-link icon-link-hover text-primary-100"
                     >
-                      <Icon class="bi fs-5" icon="mdi:arrow-right" />
+                      <Icon
+                        class="bi fs-5 text-primary-100"
+                        icon="mdi:arrow-right"
+                      />
                     </NuxtLink>
                   </div>
                 </div>

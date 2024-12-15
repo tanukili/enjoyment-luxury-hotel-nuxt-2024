@@ -4,4 +4,10 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ["@/assets/stylesheets/all.scss"],
   plugins: ["@/plugins/iconify.js"],
+  // 環境變數設定
+  runtimeConfig: {
+    public: {
+      baseUrl: ''
+    }
+  }
 });

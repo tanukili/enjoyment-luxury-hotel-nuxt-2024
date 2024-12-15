@@ -8,7 +8,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         Modal: (element) => new Modal(element),
         Collapse: (element) =>
           new Collapse(element, {
-            toggle: false, // 初始化時不自動打開
+            toggle: false, // 禜用自動開關
           }),
       },
     },

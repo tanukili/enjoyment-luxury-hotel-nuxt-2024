@@ -16,7 +16,7 @@ const { $bootstrap } = useNuxtApp();
 const headerCollapse = ref(null);
 
 watch(route, () => {
-  headerCollapse.value.toggle();
+  headerCollapse.value.hide();
 });
 
 onMounted(() => {

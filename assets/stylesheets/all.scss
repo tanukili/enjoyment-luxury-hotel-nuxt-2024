@@ -1,3 +1,6 @@
+// 匯入字形（原本設定：chrome 中的全形英文沒吃到 Noto Serif TC）
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200..900&family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap');
+
 @import "bootstrap/scss/functions";
 @import "./variables";
 @import "bootstrap/scss/variables-dark"; // can be removed safely in v6, only here to avoid breaking changes in v5.3

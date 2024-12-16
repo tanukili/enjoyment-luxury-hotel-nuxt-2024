@@ -21,3 +21,20 @@ $utilities: map-merge(
     )
   )
 );
+
+.form-control.is-invalid {
+  background-image: none;
+  border-color: $alert-100 !important;
+}
+.invalid-feedback {
+  margin-top: 7px;
+  color: $alert-100;
+  font-weight: 700;
+}
+
+.btn.btn-primary-100:disabled {
+  background: $neutral-40;
+  opacity: 1;
+  border-color: $neutral-40;
+  color: $neutral-60 !important;
+}

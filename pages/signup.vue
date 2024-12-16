@@ -1,5 +1,51 @@
 <script setup>
+const { baseUrl: baseURL } = useRuntimeConfig().public;
+
+const dialog = useDialog();
+const dialogOption = (title = "", icon = "error") => ({
+  icon,
+  title,
+});
+
 const isEmailAndPasswordValid = ref(false);
+const canUseEmail = ref(null);
+const email = ref("");
+
+const checkEmailUsable = async (isValid) => {
+  if (isValid && email.value) {
+    try {
+      const { result } = await $fetch("/verify/email", {
+        baseURL,
+        method: "POST",
+        body: {
+          email: email.value,
+        },
+      });
+      if (result.isEmailExists) {
+        dialog.open({
+          ...dialogOption("該信箱已被註冊"),
+          confirm: {
+            onComplete: () => {
+              canUseEmail.value = false;
+              email.value = "";
+            },
+          },
+        });
+      } else {
+        canUseEmail.value = true;
+      }
+    } catch (error) {
+      const { name, status } = error;
+      dialog.open({
+        ...dialogOption(`信箱驗證錯誤 ${status ? status : ""}：${name}`),
+      });
+    }
+  }
+};
+
+const onSubmit = (values) => {
+  console.log(values);
+};
 </script>
 
 <template>
@@ -10,7 +56,6 @@ const isEmailAndPasswordValid = ref(false);
           享樂酒店，誠摯歡迎
         </p>
         <h1 class="mb-4 text-neutral-0 fw-bold">立即註冊</h1>
-
         <div class="d-flex align-items-center py-4 gap-2">
           <div
             class="d-flex flex-column align-items-center gap-1 text-neutral-0"
@@ -52,48 +97,84 @@ const isEmailAndPasswordValid = ref(false);
       </div>
 
       <div class="mb-4">
-        <form :class="{ 'd-none': isEmailAndPasswordValid }" class="mb-4">
+        <VFrom
+          v-slot="{ errors, validate }"
+          :class="{ 'd-none': isEmailAndPasswordValid }"
+          @submit="onSubmit"
+          class="mb-4"
+        >
           <div class="mb-4 fs-8 fs-md-7">
-            <label class="mb-2 text-neutral-0 fw-bold" for="email">
+            <label
+              class="mb-2 text-neutral-0 fw-bold d-block d-flex align-items-center"
+              for="email"
+            >
               電子信箱
+              <Icon
+                v-if="canUseEmail"
+                class="fs-7 ms-2 text-neutral-0 bg-success-100 rounded-circle"
+                icon="material-symbols:check"
+              />
+              <span class="text-primary-100 ms-auto">必填</span>
             </label>
-            <input
+            <VField
               id="email"
+              name="email"
+              rules="required|email"
+              v-model="email"
               class="form-control p-4 text-neutral-100 fw-medium border-neutral-40"
+              :class="{ 'is-invalid': errors['email'] }"
               placeholder="hello@exsample.com"
               type="email"
+              @blur="checkEmailUsable(!errors['email'])"
             />
+            <VErrorMessage class="invalid-feedback" name="email" />
           </div>
           <div class="mb-4 fs-8 fs-md-7">
-            <label class="mb-2 text-neutral-0 fw-bold" for="password">
+            <label
+              class="mb-2 text-neutral-0 fw-bold d-block d-flex"
+              for="password"
+            >
               密碼
+              <span class="text-primary-100 ms-auto">必填</span>
             </label>
-            <input
+            <VField
               id="password"
+              name="password"
+              rules="required"
               class="form-control p-4 text-neutral-100 fw-medium border-neutral-40"
+              :class="{ 'is-invalid': errors['password'] }"
               placeholder="請輸入密碼"
               type="password"
             />
+            <VErrorMessage class="invalid-feedback" name="password" />
           </div>
           <div class="mb-10 fs-8 fs-md-7">
-            <label class="mb-2 text-neutral-0 fw-bold" for="confirmPassword">
+            <label
+              class="mb-2 text-neutral-0 fw-bold d-block d-flex"
+              for="confirmPassword"
+            >
               確認密碼
+              <span class="text-primary-100 ms-auto">必填</span>
             </label>
-            <input
+            <VField
               id="confirmPassword"
+              name="confirmPassword"
+              rules="required|confirmed:@password"
               class="form-control p-4 text-neutral-100 fw-medium border-neutral-40"
+              :class="{ 'is-invalid': errors['confirmPassword'] }"
               placeholder="請再輸入一次密碼"
               type="password"
             />
+            <VErrorMessage class="invalid-feedback" name="confirmPassword" />
           </div>
           <button
-            class="btn btn-neutral-40 w-100 py-4 text-neutral-60 fw-bold"
-            type="button"
-            @click="isEmailAndPasswordValid = true"
+            class="btn btn-primary-100 w-100 py-4 text-neutral-0 fw-bold"
+            type="submit"
+            :disabled="!canUseEmail || Object.keys(errors).length"
           >
             下一步
           </button>
-        </form>
+        </VFrom>
         <form :class="{ 'd-none': !isEmailAndPasswordValid }" class="mb-4">
           <div class="mb-4 fs-8 fs-md-7">
             <label class="mb-2 text-neutral-0 fw-bold" for="name"> 姓名 </label>
@@ -211,6 +292,7 @@ const isEmailAndPasswordValid = ref(false);
       </p>
     </div>
   </NuxtLayout>
+  <DialogBasic />
 </template>
 
 <style lang="scss" scoped>

@@ -9,5 +9,13 @@ export default defineNuxtConfig({
     public: {
       baseUrl: ''
     }
+  },
+  modules: ["@vee-validate/nuxt"],
+  veeValidate: {
+    componentNames: {
+      Form: "VFrom",
+      Field: "VField",
+      ErrorMessage: "VErrorMessage"
+    }
   }
 });

@@ -2,14 +2,11 @@
 const { baseUrl: baseURL } = useRuntimeConfig().public;
 
 const dialog = useDialog();
-const dialogOption = (title = "", icon = "error") => ({
-  icon,
-  title,
-});
 
 const isEmailAndPasswordValid = ref(false);
 const canUseEmail = ref(null);
 const email = ref("");
+const password = ref("");
 
 const checkEmailUsable = async (isValid) => {
   if (isValid && email.value) {
@@ -23,12 +20,11 @@ const checkEmailUsable = async (isValid) => {
       });
       if (result.isEmailExists) {
         dialog.open({
-          ...dialogOption("該信箱已被註冊"),
-          confirm: {
-            onComplete: () => {
-              canUseEmail.value = false;
-              email.value = "";
-            },
+          title: "信箱已被註冊",
+          content: "請填寫其他的信箱地址。",
+          didConfirm: () => {
+            canUseEmail.value = false;
+            email.value = "";
           },
         });
       } else {
@@ -37,14 +33,76 @@ const checkEmailUsable = async (isValid) => {
     } catch (error) {
       const { name, status } = error;
       dialog.open({
-        ...dialogOption(`信箱驗證錯誤 ${status ? status : ""}：${name}`),
+        title: `信箱驗證錯誤`,
+        content: `代碼 ${status ? status : ""}：${name}`,
       });
     }
   }
 };
 
-const onSubmit = (values) => {
+const birthday = ref({
+  year: 1959,
+  month: 1,
+  day: 1,
+});
+
+const districtList = [
+  {
+    name: "臺北市",
+    districts: [
+      { name: "中正區", zipcode: 100 },
+      { name: "萬華區", zipcode: 108 },
+      { name: "南港區", zipcode: 115 },
+    ],
+  },
+  {
+    name: "臺中市",
+    districts: [
+      { name: "中區", zipcode: 400 },
+      { name: "東區", zipcode: 401 },
+      { name: "北屯區", zipcode: 406 },
+    ],
+  },
+  {
+    name: "高雄市",
+    districts: [
+      { name: "前金區", zipcode: 802 },
+      { name: "苓雅區", zipcode: 803 },
+      { name: "鹽埕區", zipcode: 804 },
+    ],
+  },
+];
+const counties = computed(() => {
+  const [{ districts }] = districtList.filter(
+    (city) => city.name === address.value.city
+  );
+  return districts;
+});
+
+const address = ref({
+  city: "高雄市",
+  county: "前金區",
+});
+const zipcode = computed(() => {
+  const { zipcode } = counties.value.find(
+    (county) => county.name === address.value.county
+  );
+  return zipcode;
+});
+
+// 切換城市時代入預設選項
+watch(
+  () => address.value.city,
+  () => {
+    address.value.county = counties.value[0].name;
+  }
+);
+
+const signup = (values) => {
   console.log(values);
+  console.log(email.value, password.value);
+  console.log(birthday.value);
+  console.log(address.value, zipcode.value);
 };
 </script>
 
@@ -100,7 +158,6 @@ const onSubmit = (values) => {
         <VFrom
           v-slot="{ errors, validate }"
           :class="{ 'd-none': isEmailAndPasswordValid }"
-          @submit="onSubmit"
           class="mb-4"
         >
           <div class="mb-4 fs-8 fs-md-7">
@@ -127,7 +184,11 @@ const onSubmit = (values) => {
               type="email"
               @blur="checkEmailUsable(!errors['email'])"
             />
-            <VErrorMessage class="invalid-feedback" name="email" />
+            <VErrorMessage name="email">
+              <span class="invalid-feedback">{{
+                errors["email"].replace("email", "電子信箱")
+              }}</span>
+            </VErrorMessage>
           </div>
           <div class="mb-4 fs-8 fs-md-7">
             <label
@@ -140,13 +201,18 @@ const onSubmit = (values) => {
             <VField
               id="password"
               name="password"
-              rules="required"
+              rules="required|password"
+              v-model="password"
               class="form-control p-4 text-neutral-100 fw-medium border-neutral-40"
               :class="{ 'is-invalid': errors['password'] }"
               placeholder="請輸入密碼"
               type="password"
             />
-            <VErrorMessage class="invalid-feedback" name="password" />
+            <VErrorMessage name="password">
+              <span class="invalid-feedback">{{
+                errors["password"].replace("password", "密碼")
+              }}</span>
+            </VErrorMessage>
           </div>
           <div class="mb-10 fs-8 fs-md-7">
             <label
@@ -165,120 +231,198 @@ const onSubmit = (values) => {
               placeholder="請再輸入一次密碼"
               type="password"
             />
-            <VErrorMessage class="invalid-feedback" name="confirmPassword" />
-          </div>
-          <button
-            class="btn btn-primary-100 w-100 py-4 text-neutral-0 fw-bold"
-            type="submit"
-            :disabled="!canUseEmail || Object.keys(errors).length"
-          >
-            下一步
-          </button>
-        </VFrom>
-        <form :class="{ 'd-none': !isEmailAndPasswordValid }" class="mb-4">
-          <div class="mb-4 fs-8 fs-md-7">
-            <label class="mb-2 text-neutral-0 fw-bold" for="name"> 姓名 </label>
-            <input
-              id="name"
-              class="form-control p-4 text-neutral-100 fw-medium border-neutral-40 rounded-3"
-              placeholder="請輸入姓名"
-              type="text"
-            />
-          </div>
-          <div class="mb-4 fs-8 fs-md-7">
-            <label class="mb-2 text-neutral-0 fw-bold" for="phone">
-              手機號碼
-            </label>
-            <input
-              id="phone"
-              class="form-control p-4 text-neutral-100 fw-medium border-neutral-40 rounded-3"
-              placeholder="請輸入手機號碼"
-              type="tel"
-            />
-          </div>
-          <div class="mb-4 fs-8 fs-md-7">
-            <label class="mb-2 text-neutral-0 fw-bold" for="birth">
-              生日
-            </label>
-            <div class="d-flex gap-2">
-              <select
-                id="birth"
-                class="form-select p-4 text-neutral-80 fw-medium rounded-3"
-              >
-                <option
-                  v-for="year in 65"
-                  :key="year"
-                  value="`${year + 1958} 年`"
-                >
-                  {{ year + 1958 }} 年
-                </option>
-              </select>
-              <select
-                class="form-select p-4 text-neutral-80 fw-medium rounded-3"
-              >
-                <option v-for="month in 12" :key="month" value="`${month} 月`">
-                  {{ month }} 月
-                </option>
-              </select>
-              <select
-                class="form-select p-4 text-neutral-80 fw-medium rounded-3"
-              >
-                <option v-for="day in 30" :key="day" value="`${day} 日`">
-                  {{ day }} 日
-                </option>
-              </select>
-            </div>
-          </div>
-          <div class="mb-4 fs-8 fs-md-7">
-            <label class="form-label text-neutral-0 fw-bold" for="address">
-              地址
-            </label>
-            <div>
-              <div class="d-flex gap-2 mb-2">
-                <select
-                  class="form-select p-4 text-neutral-80 fw-medium rounded-3"
-                >
-                  <option value="臺北市">臺北市</option>
-                  <option value="臺中市">臺中市</option>
-                  <option selected value="高雄市">高雄市</option>
-                </select>
-                <select
-                  class="form-select p-4 text-neutral-80 fw-medium rounded-3"
-                >
-                  <option value="前金區">前金區</option>
-                  <option value="鹽埕區">鹽埕區</option>
-                  <option selected value="新興區">新興區</option>
-                </select>
-              </div>
-              <input
-                id="address"
-                type="text"
-                class="form-control p-4 rounded-3"
-                placeholder="請輸入詳細地址"
-              />
-            </div>
-          </div>
-
-          <div
-            class="form-check d-flex align-items-end gap-2 mb-10 text-neutral-0"
-          >
-            <input
-              id="agreementCheck"
-              class="form-check-input"
-              type="checkbox"
-              value=""
-            />
-            <label class="form-check-label fw-bold" for="agreementCheck">
-              我已閱讀並同意本網站個資使用規範
-            </label>
+            <VErrorMessage name="confirmPassword">
+              <span class="invalid-feedback">{{
+                errors["confirmPassword"].replace("confirmPassword", "確認密碼")
+              }}</span>
+            </VErrorMessage>
           </div>
           <button
             class="btn btn-primary-100 w-100 py-4 text-neutral-0 fw-bold"
             type="button"
+            :disabled="!canUseEmail || Object.keys(errors).length"
+            @click="isEmailAndPasswordValid = true"
+          >
+            下一步
+          </button>
+        </VFrom>
+        <VFrom
+          :class="{ 'd-none': !isEmailAndPasswordValid }"
+          v-slot="{ errors }"
+          @submit="signup"
+          class="mb-4"
+        >
+          <div class="mb-4 fs-8 fs-md-7">
+            <label
+              class="mb-2 text-neutral-0 fw-bold d-block d-flex"
+              for="name"
+            >
+              姓名
+              <span class="text-primary-100 ms-auto">必填</span>
+            </label>
+            <VField
+              id="name"
+              name="name"
+              rules="required"
+              class="form-control p-4 text-neutral-100 fw-medium border-neutral-40 rounded-3"
+              :class="{ 'is-invalid': errors['name'] }"
+              placeholder="請輸入姓名"
+              type="text"
+            />
+            <VErrorMessage name="name">
+              <span class="invalid-feedback">{{
+                errors["name"].replace("name", "姓名")
+              }}</span>
+            </VErrorMessage>
+          </div>
+          <div class="mb-4 fs-8 fs-md-7">
+            <label
+              class="mb-2 text-neutral-0 fw-bold d-block d-flex"
+              for="phone"
+            >
+              手機號碼
+              <span class="text-primary-100 ms-auto">必填</span>
+            </label>
+            <VField
+              id="phone"
+              name="phone"
+              rules="required|phone"
+              class="form-control p-4 text-neutral-100 fw-medium border-neutral-40 rounded-3"
+              :class="{ 'is-invalid': errors['phone'] }"
+              placeholder="請輸入手機號碼"
+              type="tel"
+            />
+            <VErrorMessage name="phone">
+              <span class="invalid-feedback">{{
+                errors["phone"].replace("phone", "手機號碼")
+              }}</span>
+            </VErrorMessage>
+          </div>
+          <div class="mb-4 fs-8 fs-md-7">
+            <label
+              class="mb-2 text-neutral-0 fw-bold d-block d-flex"
+              for="birth"
+            >
+              生日
+              <span class="text-primary-100 ms-auto">必填</span>
+            </label>
+            <div class="d-flex gap-2">
+              <VField
+                id="birth"
+                name="birthYear"
+                as="select"
+                v-model="birthday.year"
+                class="form-select p-4 text-neutral-80 fw-medium rounded-3"
+              >
+                <option v-for="year in 65" :key="year" :value="1958 + year">
+                  {{ 1958 + year }} 年
+                </option>
+              </VField>
+              <VField
+                name="birthMonth"
+                as="select"
+                v-model="birthday.month"
+                class="form-select p-4 text-neutral-80 fw-medium rounded-3"
+              >
+                <option v-for="month in 12" :key="month" :value="month">
+                  {{ month }} 月
+                </option>
+              </VField>
+              <VField
+                name="birthDay"
+                as="select"
+                v-model="birthday.day"
+                class="form-select p-4 text-neutral-80 fw-medium rounded-3"
+              >
+                <option v-for="day in 30" :key="day" :value="day">
+                  {{ day }} 日
+                </option>
+              </VField>
+            </div>
+          </div>
+          <div class="mb-4 fs-8 fs-md-7">
+            <label
+              class="form-label text-neutral-0 fw-bold d-block d-flex"
+              for="address"
+            >
+              地址
+              <span class="text-primary-100 ms-auto">必填</span>
+            </label>
+            <div>
+              <div class="d-flex gap-2 mb-2">
+                <VField
+                  name="city"
+                  as="select"
+                  v-model="address.city"
+                  class="form-select p-4 text-neutral-80 fw-medium rounded-3"
+                >
+                  <option
+                    v-for="city in districtList"
+                    :value="city.name"
+                    :key="city"
+                  >
+                    {{ city.name }}
+                  </option>
+                </VField>
+                <VField
+                  name="county"
+                  as="select"
+                  v-model="address.county"
+                  class="form-select p-4 text-neutral-80 fw-medium rounded-3"
+                >
+                  <option
+                    v-for="county in counties"
+                    :key="county.zipcode"
+                    :value="county.name"
+                  >
+                    {{ county.name }}
+                  </option>
+                </VField>
+              </div>
+              <VField
+                id="address"
+                name="detail"
+                rules="required"
+                type="text"
+                class="form-control p-4 rounded-3"
+                :class="{ 'is-invalid': errors['detail'] }"
+                placeholder="請輸入詳細地址"
+              />
+              <VErrorMessage name="detail">
+                <span class="invalid-feedback">{{
+                  errors["detail"].replace("detail", "地址")
+                }}</span>
+              </VErrorMessage>
+            </div>
+          </div>
+
+          <div
+            class="form-check d-flex flex-wrap align-items-end gap-2 mb-10 text-neutral-0"
+          >
+            <VField
+              id="agreementCheck"
+              name="agreementCheck"
+              rules="required"
+              class="form-check-input"
+              type="checkbox"
+              value="false"
+            />
+            <label class="form-check-label fw-bold" for="agreementCheck">
+              我已閱讀並同意本網站個資使用規範
+            </label>
+            <VErrorMessage name="agreementCheck">
+              <span class="invalid-feedback d-block mt-0 ms-2"
+                >同意後方能註冊</span
+              >
+            </VErrorMessage>
+          </div>
+          <button
+            class="btn btn-primary-100 w-100 py-4 text-neutral-0 fw-bold"
+            type="submit"
           >
             完成註冊
           </button>
-        </form>
+        </VFrom>
       </div>
 
       <p class="mb-0 fs-8 fs-md-7">
@@ -292,7 +436,9 @@ const onSubmit = (values) => {
       </p>
     </div>
   </NuxtLayout>
-  <DialogBasic />
+  <ClientOnly>
+    <Dialog />
+  </ClientOnly>
 </template>
 
 <style lang="scss" scoped>

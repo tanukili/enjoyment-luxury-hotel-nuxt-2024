@@ -31,7 +31,7 @@ export default defineNuxtConfig({
         },
         {
           name: 'description',
-          content: '享樂酒店，坐落於高雄市中心，是頂級奢華酒店的首選。我們為旅客提供高品質的住宿體驗，結合現代時尚設計與五星級設施，讓您盡享舒適與尊榮服務。酒店擁有精緻客房、無邊際泳池、高空酒吧及米其林推薦美食，並鄰近六合夜市、愛河、駁二藝術特區等知名景點，讓您的高雄之旅更加難忘。立即預訂，體驗無與倫比的豪華住宿！（本網站為虛擬訂房網，純粹作為前端技術練習用）'
+          content: '享樂酒店坐落於高雄市中心，是頂級奢華酒店的首選。我們為旅客提供高品質的住宿體驗，結合現代時尚設計與五星級設施，讓您盡享舒適與尊榮服務。立即預訂，體驗無與倫比的豪華住宿！（本網站為虛擬訂房網，純粹作為前端技術練習用）'
         },
         {
           property: 'url',
@@ -43,11 +43,11 @@ export default defineNuxtConfig({
         },
         {
           name: 'og:description',
-          content: '享樂酒店，坐落於高雄市中心，是頂級奢華酒店的首選。我們為旅客提供高品質的住宿體驗，結合現代時尚設計與五星級設施，讓您盡享舒適與尊榮服務。酒店擁有精緻客房、無邊際泳池、高空酒吧及米其林推薦美食，並鄰近六合夜市、愛河、駁二藝術特區等知名景點，讓您的高雄之旅更加難忘。立即預訂，體驗無與倫比的豪華住宿！（本網站為虛擬訂房網，純粹作為前端技術練習用）'
+          content: '享樂酒店坐落於高雄市中心，是頂級奢華酒店的首選。我們為旅客提供高品質的住宿體驗，結合現代時尚設計與五星級設施，讓您盡享舒適與尊榮服務。立即預訂，體驗無與倫比的豪華住宿！（本網站為虛擬訂房網，純粹作為前端技術練習用）'
         },
         {
           property: 'og:image',
-          content: '/home-hero-sm.png'
+          content: 'https://enjoyment-luxury-hotel-nuxt-2024.onrender.com/home-hero-sm.png'
         },
         {
           property: 'og:url',
@@ -68,8 +68,22 @@ export default defineNuxtConfig({
         }
       ],
       link: [
-        { rel: 'icon', href: '/logo-primary.svg' },
+        { rel: 'icon', href: 'https://enjoyment-luxury-hotel-nuxt-2024.onrender.com/logo-primary.svg' },
         { rel: 'canonical', href: 'https://enjoyment-luxury-hotel-nuxt-2024.onrender.com/' }
+      ],
+      // 結構化資料
+      script: [
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "享樂酒店",
+            "url": "https://enjoyment-luxury-hotel-nuxt-2024.onrender.com/",
+            "image": "https://enjoyment-luxury-hotel-nuxt-2024.onrender.com/home-hero-sm.png",
+            "description": "享樂酒店坐落於高雄市中心，是頂級奢華酒店的首選。我們為旅客提供高品質的住宿體驗，結合現代時尚設計與五星級設施，讓您盡享舒適與尊榮服務。立即預訂，體驗無與倫比的豪華住宿！（本網站為虛擬訂房網，純粹作為前端技術練習用）"
+          })
+        }
       ]
     }
   }

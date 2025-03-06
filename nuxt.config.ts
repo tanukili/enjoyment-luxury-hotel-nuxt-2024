@@ -45,10 +45,10 @@ export default defineNuxtConfig({
           name: 'og:description',
           content: '享樂酒店坐落於高雄市中心，是頂級奢華酒店的首選。我們為旅客提供高品質的住宿體驗，結合現代時尚設計與五星級設施，讓您盡享舒適與尊榮服務。立即預訂，體驗無與倫比的豪華住宿！（本網站為虛擬訂房網，純粹作為前端技術練習用）'
         },
-        {
-          property: 'og:image',
-          content: '/home-hero-sm.png'
-        },
+        // {
+        //   property: 'og:image',
+        //   content: '/home-hero-sm.png'
+        // },
         {
           property: 'og:url',
           content: 'https://enjoyment-luxury-hotel-nuxt-2024.onrender.com/'
@@ -68,7 +68,7 @@ export default defineNuxtConfig({
         }
       ],
       link: [
-        { rel: 'icon', href: '/logo-primary.svg' },
+        // { rel: 'icon', href: '/logo-primary.svg' },
         { rel: 'canonical', href: 'https://enjoyment-luxury-hotel-nuxt-2024.onrender.com/' }
       ],
       // 結構化資料

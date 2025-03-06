@@ -32,13 +32,6 @@ const [{ data: allNews }, { data: pickupRoom }, { data: delicacy }] =
     useFetch("/rooms/675d99efadacce5370f8cfee", fetchOption),
     useFetch("/home/culinary/", fetchOption),
   ]);
-
-const swiperImages = computed(() => {
-  if (!!pickupRoom.value) {
-    return [pickupRoom.value.imageUrl, ...pickupRoom.value.imageUrlList];
-  }
-  return [];
-});
 </script>
 
 <template>
@@ -191,7 +184,13 @@ const swiperImages = computed(() => {
           }"
           :loop="true"
         >
-          <swiper-slide v-for="(image, index) in swiperImages" :key="index">
+          <swiper-slide
+            v-for="(image, index) in [
+              pickupRoom?.imageUrl,
+              ...pickupRoom?.imageUrlList,
+            ]"
+            :key="index"
+          >
             <picture>
               <source :srcset="image" media="(min-width:768px)" />
               <img class="w-100" :src="image" :alt="`room-${index + 1}`" />

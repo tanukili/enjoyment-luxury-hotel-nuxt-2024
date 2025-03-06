@@ -1,5 +1,5 @@
 <script setup>
-import { dialogData, useDialog } from "@/composables/useDialog.js";
+import { dialogObj, useDialog } from "@/composables/useDialog.js";
 
 const dialog = useDialog();
 </script>
@@ -15,7 +15,7 @@ const dialog = useDialog();
         style="max-width: 1020px; border-radius: 20px"
       >
         <div class="d-flex gap-4">
-          <template v-if="dialogData.icon === 'loading'" class="my-15">
+          <template v-if="dialogObj.icon === 'loading'" class="my-15">
             <div
               class="spinner-grow bg-neutral-100"
               style="--bs-spinner-animation-speed: 1s"
@@ -38,13 +38,13 @@ const dialog = useDialog();
               <span class="visually-hidden">Loading...</span>
             </div>
           </template>
-          <template v-else-if="dialogData.icon === 'success'">
+          <template v-else-if="dialogObj.icon === 'success'">
             <Icon
               class="p-2 display-2 text-neutral-0 bg-success-100 rounded-circle my-8"
               icon="material-symbols:check"
             />
           </template>
-          <template v-else-if="dialogData.icon === 'error'">
+          <template v-else-if="dialogObj.icon === 'error'">
             <Icon
               class="p-2 display-2 text-neutral-0 bg-alert-100 rounded-circle my-8"
               icon="material-symbols:close"
@@ -59,30 +59,33 @@ const dialog = useDialog();
         />
         <main class="mb-8">
           <h3 class="mb-0 text-center text-neutral-100 fs-5 fw-bold">
-            {{ dialogData.title }}
+            {{ dialogObj.title }}
           </h3>
           <p
-            v-if="dialogData.content"
+            v-if="dialogObj.content"
             class="text-center text-neutral-100 fw-medium"
           >
-            {{ dialogData.content }}
+            {{ dialogObj.content }}
           </p>
         </main>
         <footer
           class="d-flex flex-wrap justify-content-center w-100 w-sm-50 gap-2"
         >
           <button
-            v-if="dialogData.cancel.needShow"
+            v-if="dialogObj.showCancelBtn"
+            type="button"
             class="cancel btn btn-neutral-0 text-primary-100 border border-primary-100 fw-bold w-100 w-sm-45 py-4"
-            @click="dialog.close('cancel')"
+            @click="dialog.close('didCancel')"
           >
-            {{ dialogData.cancel.btnName }}
+            {{ dialogObj.cancelBtnText }}
           </button>
           <button
+            v-if="dialogObj.showConfirmBtn"
+            type="button"
             class="confirm btn btn-primary-100 text-neutral-0 fw-bold w-100 w-sm-45 py-4"
-            @click="dialog.close('confirm')"
+            @click="dialog.close('didConfirm')"
           >
-            {{ dialogData.confirm.btnName }}
+            {{ dialogObj.confirmBtnText }}
           </button>
         </footer>
       </div>

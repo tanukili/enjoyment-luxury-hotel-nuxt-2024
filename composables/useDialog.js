@@ -1,19 +1,16 @@
 const dialogRef = ref(null);
 
-// reactive(物件)
-export const dialogData = reactive({
-  icon: "",
+export const dialogObj = reactive({
+  icon: "error",
   title: "",
+  showTitleMd: true,
   content: "",
-  confirm: {
-    btnName: "確認",
-    onComplete: () => {},
-  },
-  cancel: {
-    btnName: "關閉",
-    onComplete: () => {},
-    needShow: false,
-  },
+  showConfirmBtn: true,
+  confirmBtnText: "確認",
+  didConfirm: () => {},
+  showCancelBtn: false,
+  cancelBtnText: "關閉",
+  didCancel: () => {},
 });
 
 export const useDialog = () => {
@@ -23,26 +20,17 @@ export const useDialog = () => {
 
   const open = (option) => {
     if (option) {
-      dialogData.icon = option.icon || "loading";
-      dialogData.title = option.title || "預設 title";
-      dialogData.content = option.content || "";
-    }
-    if (option.cancel) {
-      Object.keys(option.cancel).forEach((key) => {
-        dialogData.cancel[key] = option.cancel[key];
-      });
-    }
-    if (option.confirm) {
-      Object.keys(option.confirm).forEach((key) => {
-        dialogData.confirm[key] = option.confirm[key];
+      Object.keys(option).forEach((key) => {
+        dialogObj[key] = option[key];
       });
     }
     dialogRef.value.showModal();
   };
 
   const close = (type) => {
-    if (dialogData[type].onComplete) {
-      dialogData[type].onComplete();
+    if (dialogObj[type]) {
+      const extraAction = dialogObj[type];
+      extraAction();
     }
     dialogRef.value.close();
   };

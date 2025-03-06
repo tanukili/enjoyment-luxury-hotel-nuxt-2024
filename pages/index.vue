@@ -5,6 +5,7 @@ import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { all } from "@vee-validate/rules";
 
 const modules = ref([Autoplay, Navigation, Pagination]);
 
@@ -19,19 +20,24 @@ const slideNext = () => {
 };
 
 // 取得渲染用的遠端資料
-const config = useRuntimeConfig();
-const { baseUrl: baseURL } = config.public;
-const fetchOption = {
-  transform: (res) => res.result,
-  baseURL,
-};
+const baseUrl = "https://two024-ts-freyia.onrender.com/api/v1";
 
-const [{ data: allNews }, { data: pickupRoom }, { data: delicacy }] =
-  await Promise.all([
-    useFetch("/home/news/", fetchOption),
-    useFetch("/rooms/675d99efadacce5370f8cfee", fetchOption),
-    useFetch("/home/culinary/", fetchOption),
-  ]);
+const { data } = await useAsyncData("indexRemoveInfo", async () => {
+  try {
+    const apis = [
+      $fetch(`${baseUrl}/home/news/`),
+      $fetch(`${baseUrl}/rooms/675d99efadacce5370f8cfee`),
+      $fetch(`${baseUrl}/home/culinary/`),
+    ];
+    const allData = await Promise.allSettled(apis);
+    return allData.map((data) =>
+      data.status === "fulfilled" ? data.value.result : null
+    );
+  } catch {
+    return [null, null, null];
+  }
+});
+const [allNews, pickupRoom, delicacy] = data.value || [];
 </script>
 
 <template>
@@ -186,8 +192,8 @@ const [{ data: allNews }, { data: pickupRoom }, { data: delicacy }] =
         >
           <swiper-slide
             v-for="(image, index) in [
-              pickupRoom.imageUrl,
-              ...pickupRoom.imageUrlList,
+              pickupRoom?.imageUrl,
+              ...pickupRoom?.imageUrlList,
             ]"
             :key="index"
           >

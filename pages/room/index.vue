@@ -8,12 +8,11 @@ import "swiper/css/pagination";
 
 const modules = ref([Autoplay, Navigation, Pagination]);
 
-const config = useRuntimeConfig();
-const { baseUrl: baseURL } = config.public;
+// 取得渲染用的遠端資料
+const baseUrl = "https://two024-ts-freyia.onrender.com/api/v1";
 
-const { data: rooms } = await useFetch("/rooms/", {
+const { data: rooms } = await useFetch(`${baseUrl}/rooms/`, {
   transform: (res) => res.result,
-  baseURL,
 });
 </script>
 
@@ -89,8 +88,8 @@ const { data: rooms } = await useFetch("/rooms/", {
                 >
                   <swiper-slide
                     v-for="(image, index) in [
-                      room.imageUrl,
-                      ...room.imageUrlList,
+                      room?.imageUrl,
+                      ...room?.imageUrlList,
                     ]"
                     :key="index"
                   >

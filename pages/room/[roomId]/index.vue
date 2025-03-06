@@ -1,12 +1,12 @@
 <script setup>
 const route = useRoute();
 const { roomId } = route.params;
-const config = useRuntimeConfig();
-const { baseUrl: baseURL } = config.public;
 
-const { data: room } = await useFetch(`/rooms/${roomId}`, {
+// 取得渲染用的遠端資料
+const baseUrl = "https://two024-ts-freyia.onrender.com/api/v1";
+
+const { data: room } = await useFetch(`${baseUrl}/rooms/${roomId}`, {
   transform: (res) => res.result,
-  baseURL,
 });
 
 const datePickerModal = ref(null);
@@ -61,12 +61,12 @@ const handleDateChange = (bookingInfo) => {
             <div v-for="(num, index) in 2" :key="index" class="d-flex gap-md-2">
               <img
                 class="w-50"
-                :src="room.imageUrlList[index * 2]"
+                :src="room?.imageUrlList[index * 2]"
                 :alt="`room-${index * 2 + 1}`"
               />
               <img
                 class="w-50"
-                :src="room.imageUrlList[index * 2 + 1]"
+                :src="room?.imageUrlList[index * 2 + 1]"
                 :alt="`room-${index * 2 + 2}`"
               />
             </div>

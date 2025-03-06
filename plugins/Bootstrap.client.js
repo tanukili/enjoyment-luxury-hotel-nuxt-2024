@@ -6,7 +6,10 @@ export default defineNuxtPlugin((nuxtApp) => {
     provide: {
       bootstrap: {
         Modal: (element) => new Modal(element),
-        Collapse: (element) => new Collapse(element),
+        Collapse: (element) =>
+          new Collapse(element, {
+            toggle: false, // 禜用自動開關
+          }),
       },
     },
   };

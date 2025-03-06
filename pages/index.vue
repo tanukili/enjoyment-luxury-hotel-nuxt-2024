@@ -26,12 +26,19 @@ const fetchOption = {
   baseURL,
 };
 
-const [{ data: allNews }, { data: pickupRoom }, { data: delicacy }] =
-  await Promise.all([
-    useFetch("/home/news/", fetchOption),
-    useFetch("/rooms/675d99efadacce5370f8cfee", fetchOption),
-    useFetch("/home/culinary/", fetchOption),
-  ]);
+// const [{ data: allNews }, { data: pickupRoom }, { data: delicacy }] =
+//   await Promise.all([
+//     useFetch("/home/news/", fetchOption),
+//     useFetch("/rooms/675d99efadacce5370f8cfee", fetchOption),
+//     useFetch("/home/culinary/", fetchOption),
+//   ]);
+
+const { data: allNews } = await useFetch("/home/news/", fetchOption);
+const { data: pickupRoom } = await useFetch(
+  "/rooms/675d99efadacce5370f8cfee",
+  fetchOption
+);
+const { data: delicacy } = await useFetch("/home/culinary/", fetchOption);
 </script>
 
 <template>

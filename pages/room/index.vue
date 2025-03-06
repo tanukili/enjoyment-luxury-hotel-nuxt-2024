@@ -89,8 +89,8 @@ const { data: rooms } = await useFetch("/rooms/", {
                 >
                   <swiper-slide
                     v-for="(image, index) in [
-                      room.imageUrl,
-                      ...room.imageUrlList,
+                      room?.imageUrl,
+                      ...room?.imageUrlList,
                     ]"
                     :key="index"
                   >

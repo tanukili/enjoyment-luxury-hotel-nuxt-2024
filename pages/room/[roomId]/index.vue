@@ -61,12 +61,12 @@ const handleDateChange = (bookingInfo) => {
             <div v-for="(num, index) in 2" :key="index" class="d-flex gap-md-2">
               <img
                 class="w-50"
-                :src="room.imageUrlList[index * 2]"
+                :src="room?.imageUrlList[index * 2]"
                 :alt="`room-${index * 2 + 1}`"
               />
               <img
                 class="w-50"
-                :src="room.imageUrlList[index * 2 + 1]"
+                :src="room?.imageUrlList[index * 2 + 1]"
                 :alt="`room-${index * 2 + 2}`"
               />
             </div>

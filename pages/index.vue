@@ -186,8 +186,8 @@ const [{ data: allNews }, { data: pickupRoom }, { data: delicacy }] =
         >
           <swiper-slide
             v-for="(image, index) in [
-              pickupRoom.imageUrl,
-              ...pickupRoom.imageUrlList,
+              pickupRoom?.imageUrl,
+              ...pickupRoom?.imageUrlList,
             ]"
             :key="index"
           >

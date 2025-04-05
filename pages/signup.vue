@@ -1,18 +1,20 @@
 <script setup>
-const { baseUrl: baseURL } = useRuntimeConfig().public;
+const router = useRouter();
+const baseUrl = "https://two024-ts-freyia.onrender.com/api/v1";
 
 const dialog = useDialog();
 
+// 第一步驟的資料方法
 const isEmailAndPasswordValid = ref(false);
-const canUseEmail = ref(null);
 const email = ref("");
 const password = ref("");
+const canUseEmail = ref(null);
 
 const checkEmailUsable = async (isValid) => {
+  canUseEmail.value = false;
   if (isValid && email.value) {
     try {
-      const { result } = await $fetch("/verify/email", {
-        baseURL,
+      const { result } = await $fetch(`${baseUrl}/verify/email`, {
         method: "POST",
         body: {
           email: email.value,
@@ -31,19 +33,31 @@ const checkEmailUsable = async (isValid) => {
         canUseEmail.value = true;
       }
     } catch (error) {
-      const { name, status } = error;
+      const { name, status } = error?.data;
       dialog.open({
         title: `信箱驗證錯誤`,
         content: `代碼 ${status ? status : ""}：${name}`,
       });
     }
   }
+  canUseEmail.value = true;
 };
 
+watch(email, (newEmail) => {
+  if (!newEmail) {
+    canUseEmail.value = null;
+  }
+});
+
+// 第二步驟的資料方法
 const birthday = ref({
   year: 1959,
   month: 1,
   day: 1,
+});
+const address = ref({
+  city: "高雄市",
+  county: "前金區",
 });
 
 const districtList = [
@@ -72,6 +86,7 @@ const districtList = [
     ],
   },
 ];
+
 const counties = computed(() => {
   const [{ districts }] = districtList.filter(
     (city) => city.name === address.value.city
@@ -79,10 +94,6 @@ const counties = computed(() => {
   return districts;
 });
 
-const address = ref({
-  city: "高雄市",
-  county: "前金區",
-});
 const zipcode = computed(() => {
   const { zipcode } = counties.value.find(
     (county) => county.name === address.value.county
@@ -98,17 +109,68 @@ watch(
   }
 );
 
-const signup = (values) => {
-  console.log(values);
-  console.log(email.value, password.value);
-  console.log(birthday.value);
-  console.log(address.value, zipcode.value);
+const isSubmitting = ref(false);
+
+const signup = async (values) => {
+  const { name, phone, birthYear, birthMonth, birthDay, city, county, detail } =
+    values;
+  const signupInfo = {
+    name,
+    phone,
+    email: email.value,
+    password: password.value,
+    birthday: `${birthYear}/${birthMonth}/${birthDay}`,
+    address: {
+      city,
+      county,
+      zipcode: zipcode.value,
+      detail,
+    },
+  };
+  const cookieToken = useCookie("token", {
+    maxAge: 86400,
+  });
+
+  try {
+    isSubmitting.value = true;
+    const { token } = await $fetch(`${baseUrl}/user/signup`, {
+      method: "POST",
+      body: {
+        ...signupInfo,
+      },
+    });
+    cookieToken.value = token;
+    isSubmitting.value = false;
+    dialog.open({
+      title: "註冊成功",
+      confirmBtnText: "前往訂房",
+      didConfirm: () => {
+        router.push({ path: "/room" });
+      },
+      showCancelBtn: true,
+      cancelBtnText: "前往會員頁",
+      didCancel: () => {
+        router.push({ path: "/user" });
+      },
+    });
+  } catch (error) {
+    const { message } = error?.data;
+    dialog.open({
+      title: `註冊失敗`,
+      content: message,
+      didConfirm: () => {
+        isEmailAndPasswordValid.value = false;
+        email.value = "";
+      },
+    });
+    isSubmitting.value = false;
+  }
 };
 </script>
 
 <template>
   <NuxtLayout name="account">
-    <div class="p-5 px-md-0 py-md-30">
+    <div class="account-container p-5 px-md-0 py-md-30">
       <div class="mb-10">
         <p class="mb-2 text-primary-100 fs-8 fs-md-7 fw-bold">
           享樂酒店，誠摯歡迎
@@ -153,11 +215,10 @@ const signup = (values) => {
           </div>
         </div>
       </div>
-
       <div class="mb-4">
         <VFrom
-          v-slot="{ errors, validate }"
-          :class="{ 'd-none': isEmailAndPasswordValid }"
+          v-slot="{ errors, values }"
+          v-show="!isEmailAndPasswordValid"
           class="mb-4"
         >
           <div class="mb-4 fs-8 fs-md-7">
@@ -167,9 +228,14 @@ const signup = (values) => {
             >
               電子信箱
               <Icon
-                v-if="canUseEmail"
-                class="fs-7 ms-2 text-neutral-0 bg-success-100 rounded-circle"
-                icon="material-symbols:check"
+                v-if="!!email"
+                class="fs-7 ms-2 text-neutral-0 rounded-circle"
+                :class="{ 'bg-success-100': canUseEmail }"
+                :icon="
+                  canUseEmail
+                    ? 'material-symbols:check'
+                    : 'line-md:loading-twotone-loop'
+                "
               />
               <span class="text-primary-100 ms-auto">必填</span>
             </label>
@@ -240,15 +306,20 @@ const signup = (values) => {
           <button
             class="btn btn-primary-100 w-100 py-4 text-neutral-0 fw-bold"
             type="button"
-            :disabled="!canUseEmail || Object.keys(errors).length"
+            :disabled="
+              !canUseEmail ||
+              !password ||
+              !values.confirmPassword ||
+              Object.keys(errors).length
+            "
             @click="isEmailAndPasswordValid = true"
           >
             下一步
           </button>
         </VFrom>
         <VFrom
-          :class="{ 'd-none': !isEmailAndPasswordValid }"
           v-slot="{ errors }"
+          v-show="isEmailAndPasswordValid"
           @submit="signup"
           class="mb-4"
         >
@@ -397,7 +468,7 @@ const signup = (values) => {
           </div>
 
           <div
-            class="form-check d-flex flex-wrap align-items-end gap-2 mb-10 text-neutral-0"
+            class="form-check d-flex flex-wrap align-items-end gap-2 text-neutral-0"
           >
             <VField
               id="agreementCheck"
@@ -410,17 +481,22 @@ const signup = (values) => {
             <label class="form-check-label fw-bold" for="agreementCheck">
               我已閱讀並同意本網站個資使用規範
             </label>
-            <VErrorMessage name="agreementCheck">
-              <span class="invalid-feedback d-block mt-0 ms-2"
-                >同意後方能註冊</span
-              >
-            </VErrorMessage>
           </div>
+          <span
+            v-if="errors['agreementCheck']"
+            class="w-100 text-alert-100 fw-bold fs-8 mt-0"
+            >同意後才能註冊</span
+          >
           <button
-            class="btn btn-primary-100 w-100 py-4 text-neutral-0 fw-bold"
+            class="btn btn-primary-100 w-100 py-4 text-neutral-0 fw-bold mt-10"
             type="submit"
           >
-            完成註冊
+            <Icon
+              v-if="isSubmitting"
+              class="fs-7 ms-2 text-neutral-0"
+              icon="line-md:loading-twotone-loop"
+            />
+            <span v-else>完成註冊</span>
           </button>
         </VFrom>
       </div>
@@ -485,5 +561,13 @@ input::placeholder {
   align-items: center;
   width: 32px;
   height: 32px;
+}
+
+.account-container {
+  @include media-breakpoint-up(lg) {
+    & {
+      min-width: 416px;
+    }
+  }
 }
 </style>

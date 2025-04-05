@@ -1,6 +1,5 @@
 const dialogRef = ref(null);
-
-export const dialogObj = reactive({
+const initializedDialogObj = {
   icon: "error",
   title: "",
   showTitleMd: true,
@@ -11,7 +10,9 @@ export const dialogObj = reactive({
   showCancelBtn: false,
   cancelBtnText: "關閉",
   didCancel: () => {},
-});
+};
+
+export const dialogObj = reactive({ ...initializedDialogObj });
 
 export const useDialog = () => {
   onMounted(() => {
@@ -33,6 +34,7 @@ export const useDialog = () => {
       extraAction();
     }
     dialogRef.value.close();
+    Object.assign(dialogObj, initializedDialogObj); // 回歸預設
   };
 
   return { open, close };

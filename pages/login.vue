@@ -1,4 +1,97 @@
-<script setup></script>
+<script setup>
+import { is } from "@vee-validate/rules";
+
+const router = useRouter();
+const dialog = useDialog();
+const baseUrl = "https://two024-ts-freyia.onrender.com/api/v1";
+const cookieUser = useCookie("user", {
+  maxAge: 86400,
+  path: "/",
+});
+
+onMounted(async () => {
+  let isLogined = false;
+  if (cookieUser?.value?.token) {
+    // CSR 請求資源
+    const { status } = await $fetch(`${baseUrl}/user/check`, {
+      headers: {
+        Authorization: `Bearer ${cookieUser.value.token}`,
+      },
+    });
+    isLogined = status;
+  }
+  if (isLogined) {
+    dialog.open({
+      title: "您已登入",
+      confirmBtnText: "登出帳號",
+      didConfirm: () => {
+        console.log("登出 function");
+      },
+      showCancelBtn: true,
+      cancelBtnText: "前往會員頁",
+      didCancel: () => {
+        router.push({ path: "/user" });
+      },
+    });
+  }
+});
+
+const credentials = reactive({
+  email: null,
+  password: null,
+});
+const needRememberEmail = ref(false);
+const cookieRememberedEmail = useCookie("userEmail", {
+  path: "/",
+});
+const isSubmitting = ref(false);
+
+onMounted(() => {
+  if (cookieRememberedEmail.value) {
+    credentials.email = cookieRememberedEmail.value;
+    needRememberEmail.value = true;
+  }
+});
+
+const login = async () => {
+  isSubmitting.value = true;
+  try {
+    const { token, result } = await $fetch(`${baseUrl}/user/login`, {
+      method: "POST",
+      body: {
+        ...credentials,
+      },
+    });
+    cookieUser.value = {
+      token,
+      id: result.id,
+    };
+    if (needRememberEmail.value) {
+      cookieRememberedEmail.value = result.email;
+    }
+    dialog.open({
+      title: "登入成功",
+      confirmBtnText: "前往訂房",
+      didConfirm: () => {
+        router.push({ path: "/room" });
+      },
+      showCancelBtn: true,
+      cancelBtnText: "前往會員頁",
+      didCancel: () => {
+        router.push({ path: "/user" });
+      },
+    });
+  } catch (error) {
+    const { message } = error?.data;
+    const isPassordWrong = !message.search("密碼");
+    isPassordWrong ? (credentials.password = null) : (credentials.email = null);
+    dialog.open({
+      title: message,
+    });
+  }
+  isSubmitting.value = false;
+};
+</script>
 
 <template>
   <NuxtLayout name="account">
@@ -10,30 +103,46 @@
         <h1 class="text-neutral-0 fw-bold">立即開始旅程</h1>
       </div>
 
-      <form class="mb-10">
+      <VFrom v-slot="{ errors }" @submit="login" class="mb-10">
         <div class="mb-4 fs-8 fs-md-7">
           <label class="mb-2 text-neutral-0 fw-bold" for="email">
             電子信箱
           </label>
-          <input
+          <VField
             id="email"
+            name="email"
+            v-model="credentials.email"
+            rules="required|email"
             class="form-control p-4 text-neutral-100 fw-medium border-neutral-40"
-            value="jessica@sample.com"
+            :class="{ 'is-invalid': errors['email'] }"
             placeholder="請輸入信箱"
             type="email"
           />
+          <VErrorMessage name="email">
+            <span class="invalid-feedback">{{
+              errors["email"].replace("email", "電子信箱")
+            }}</span>
+          </VErrorMessage>
         </div>
         <div class="mb-4 fs-8 fs-md-7">
           <label class="mb-2 text-neutral-0 fw-bold" for="password">
             密碼
           </label>
-          <input
+          <VField
             id="password"
+            name="password"
+            v-model="credentials.password"
+            rules="required|min:8|alpha_num"
             class="form-control p-4 text-neutral-100 fw-medium border-neutral-40"
-            value="jessica@sample.com"
+            :class="{ 'is-invalid': errors['password'] }"
             placeholder="請輸入密碼"
             type="password"
           />
+          <VErrorMessage name="password">
+            <span class="invalid-feedback">{{
+              errors["password"].replace("password", "密碼")
+            }}</span>
+          </VErrorMessage>
         </div>
         <div
           class="d-flex justify-content-between align-items-center mb-10 fs-8 fs-md-7"
@@ -41,9 +150,9 @@
           <div class="form-check d-flex align-items-end gap-2 text-neutral-0">
             <input
               id="remember"
+              v-model="needRememberEmail"
               class="form-check-input"
               type="checkbox"
-              value=""
             />
             <label class="form-check-label fw-bold" for="remember">
               記住帳號
@@ -58,11 +167,21 @@
         </div>
         <button
           class="btn btn-primary-100 w-100 py-4 text-neutral-0 fw-bold"
-          type="button"
+          type="submit"
+          :disabled="
+            Object.keys(errors).length ||
+            !credentials.email ||
+            !credentials.password
+          "
         >
-          會員登入
+          <Icon
+            v-if="isSubmitting"
+            class="fs-7 ms-2 text-neutral-0"
+            icon="line-md:loading-twotone-loop"
+          />
+          <span v-else>會員登入</span>
         </button>
-      </form>
+      </VFrom>
 
       <p class="mb-0 fs-8 fs-md-7">
         <span class="me-2 text-neutral-0 fw-medium">沒有會員嗎？</span>
@@ -75,6 +194,7 @@
       </p>
     </div>
   </NuxtLayout>
+  <Dialog />
 </template>
 
 <style lang="scss" scoped>

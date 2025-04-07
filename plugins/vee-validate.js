@@ -1,5 +1,11 @@
 import { defineRule, configure } from "vee-validate";
-import { required, email, confirmed } from "@vee-validate/rules";
+import {
+  required,
+  email,
+  confirmed,
+  min,
+  alpha_num,
+} from "@vee-validate/rules";
 
 import { localize, setLocale } from "@vee-validate/i18n";
 import zhTW from "@vee-validate/i18n/dist/locale/zh_TW.json";
@@ -8,6 +14,9 @@ export default defineNuxtPlugin((nuxtApp) => {
   defineRule("required", required);
   defineRule("email", email);
   defineRule("confirmed", confirmed);
+  defineRule("min", min);
+  defineRule("alpha_num", alpha_num);
+
   // 自訂密碼規則：至少 8 碼以上，並英數混合
   defineRule("password", (value) => {
     const regex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;

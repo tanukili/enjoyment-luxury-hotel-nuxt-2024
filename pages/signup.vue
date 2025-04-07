@@ -110,6 +110,10 @@ watch(
 );
 
 const isSubmitting = ref(false);
+const cookieUser = useCookie("user", {
+  maxAge: 86400,
+  path: "/",
+});
 
 const signup = async (values) => {
   const { name, phone, birthYear, birthMonth, birthDay, city, county, detail } =
@@ -127,20 +131,21 @@ const signup = async (values) => {
       detail,
     },
   };
-  const cookieToken = useCookie("token", {
-    maxAge: 86400,
-  });
-
   try {
     isSubmitting.value = true;
-    const { token } = await $fetch(`${baseUrl}/user/signup`, {
+    const { token, result } = await $fetch(`${baseUrl}/user/signup`, {
       method: "POST",
       body: {
         ...signupInfo,
       },
     });
-    cookieToken.value = token;
+
+    cookieUser.value = {
+      token,
+      id: result.id,
+    };
     isSubmitting.value = false;
+
     dialog.open({
       title: "註冊成功",
       confirmBtnText: "前往訂房",
